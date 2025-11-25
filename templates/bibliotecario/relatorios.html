@@ -1,0 +1,475 @@
+{% extends "bibliotecario/base_bibliotecario.html" %}
+
+{% block title %}Relatórios - Bibliotecário{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+    <h2 class="fw-bold mt-3 mb-4">RELATÓRIOS - {{ session.unidade }}</h2>
+
+    <!-- Botões de Ação -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <button class="btn btn-primary" onclick="gerarRelatorio()">
+                <i class="bx bx-refresh"></i> Gerar Relatório
+            </button>
+            <button class="btn btn-success" onclick="exportarPDF()" id="btnExportarPDF" disabled>
+                <i class="bx bx-download"></i> Exportar em PDF
+            </button>
+            <div id="loadingSpinner" class="spinner-border text-primary ms-3" role="status" style="display: none;">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensagem de Erro -->
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert" style="display: none;">
+        <span id="errorText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Conteúdo do Relatório -->
+    <div id="relatorioContent" style="display: none;">
+        <!-- Gráfico de Empréstimos (Últimos 15 dias) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        <i class="bx bx-bar-chart-alt-2"></i> EMPRÉSTIMOS - ÚLTIMOS 15 DIAS
+                    </div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chartEmprestimos"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Empréstimos (Últimos 15 dias) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        DETALHES DE EMPRÉSTIMOS
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mb-0" id="tabelaEmprestimos">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Total de Empréstimos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Devoluções (Últimos 15 dias) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        <i class="bx bx-bar-chart-alt-2"></i> DEVOLUÇÕES - ÚLTIMOS 15 DIAS
+                    </div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chartDevolucoes"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Devoluções (Últimos 15 dias) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        DETALHES DE DEVOLUÇÕES
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mb-0" id="tabelaDevolucoes">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Total de Devoluções</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Top 5 Livros Mais Emprestados -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        <i class="bx bx-trophy"></i> TOP 5 LIVROS MAIS EMPRESTADOS
+                    </div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chartTop5Livros"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Livros por Gênero -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        <i class="bx bx-book"></i> LIVROS POR GÊNERO MAIS EMPRESTADOS
+                    </div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chartGeneros"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Gêneros -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">
+                        DETALHES DE GÊNEROS
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mb-0" id="tabelaGeneros">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Gênero</th>
+                                    <th>Total de Empréstimos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    let chartEmprestimos = null;
+    let chartDevolucoes = null;
+    let chartTop5Livros = null;
+    let chartGeneros = null;
+
+    function gerarRelatorio() {
+        const loading = document.getElementById('loadingSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+        const relatorioContent = document.getElementById('relatorioContent');
+        const btnExportar = document.getElementById('btnExportarPDF');
+
+        // Mostrar loading
+        loading.style.display = 'inline-block';
+        errorMessage.style.display = 'none';
+        relatorioContent.style.display = 'none';
+        btnExportar.disabled = true;
+
+        // Fazer requisição para a API
+        fetch('/relatorios/bibliotecario/api/relatorios')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar dados do relatório');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Processar dados e criar gráficos
+                processarDados(data);
+
+                // Esconder loading e mostrar conteúdo
+                loading.style.display = 'none';
+                relatorioContent.style.display = 'block';
+                btnExportar.disabled = false;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const errorText = document.getElementById('errorText');
+                errorText.textContent = 'Erro ao carregar os dados do relatório. Tente novamente.';
+                errorMessage.style.display = 'block';
+                loading.style.display = 'none';
+            });
+    }
+
+    function processarDados(data) {
+        // Processar Empréstimos
+        processarEmprestimos(data.emprestimos_15_dias);
+
+        // Processar Devoluções
+        processarDevolucoes(data.devolucoes_15_dias);
+
+        // Processar Top 5 Livros
+        processarTop5Livros(data.top_5_livros);
+
+        // Processar Gêneros
+        processarGeneros(data.generos_mais_emprestados);
+    }
+
+    function processarEmprestimos(dados) {
+        // Preencher tabela
+        const tbody = document.querySelector('#tabelaEmprestimos tbody');
+        tbody.innerHTML = '';
+        dados.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${formatarData(item.data)}</td>
+                <td>${item.total}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // Criar gráfico
+        const ctx = document.getElementById('chartEmprestimos').getContext('2d');
+        if (chartEmprestimos) {
+            chartEmprestimos.destroy();
+        }
+        chartEmprestimos = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dados.map(d => formatarData(d.data)),
+                datasets: [{
+                    label: 'Empréstimos',
+                    data: dados.map(d => d.total),
+                    backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function processarDevolucoes(dados) {
+        // Preencher tabela
+        const tbody = document.querySelector('#tabelaDevolucoes tbody');
+        tbody.innerHTML = '';
+        dados.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${formatarData(item.data)}</td>
+                <td>${item.total}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // Criar gráfico
+        const ctx = document.getElementById('chartDevolucoes').getContext('2d');
+        if (chartDevolucoes) {
+            chartDevolucoes.destroy();
+        }
+        chartDevolucoes = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dados.map(d => formatarData(d.data)),
+                datasets: [{
+                    label: 'Devoluções',
+                    data: dados.map(d => d.total),
+                    backgroundColor: 'rgba(25, 135, 84, 0.6)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function processarTop5Livros(dados) {
+        // Criar gráfico
+        const ctx = document.getElementById('chartTop5Livros').getContext('2d');
+        if (chartTop5Livros) {
+            chartTop5Livros.destroy();
+        }
+        chartTop5Livros = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dados.map(d => d.titulo),
+                datasets: [{
+                    label: 'Total de Empréstimos',
+                    data: dados.map(d => d.total),
+                    backgroundColor: [
+                        'rgba(255, 193, 7, 0.6)',
+                        'rgba(244, 67, 54, 0.6)',
+                        'rgba(33, 150, 243, 0.6)',
+                        'rgba(76, 175, 80, 0.6)',
+                        'rgba(156, 39, 176, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(244, 67, 54, 1)',
+                        'rgba(33, 150, 243, 1)',
+                        'rgba(76, 175, 80, 1)',
+                        'rgba(156, 39, 176, 1)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function processarGeneros(dados) {
+        // Preencher tabela
+        const tbody = document.querySelector('#tabelaGeneros tbody');
+        tbody.innerHTML = '';
+        dados.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.genero}</td>
+                <td>${item.total}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // Criar gráfico
+        const ctx = document.getElementById('chartGeneros').getContext('2d');
+        if (chartGeneros) {
+            chartGeneros.destroy();
+        }
+        chartGeneros = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: dados.map(d => d.genero),
+                datasets: [{
+                    label: 'Total de Empréstimos',
+                    data: dados.map(d => d.total),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
+                        'rgba(199, 199, 199, 0.6)',
+                        'rgba(83, 102, 255, 0.6)',
+                        'rgba(255, 99, 164, 0.6)',
+                        'rgba(54, 235, 162, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)',
+                        'rgba(83, 102, 255, 1)',
+                        'rgba(255, 99, 164, 1)',
+                        'rgba(54, 235, 162, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+
+    function formatarData(data) {
+        const date = new Date(data + 'T00:00:00');
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    function exportarPDF() {
+        const element = document.getElementById('relatorioContent');
+        if (element.style.display === 'none') {
+            alert('Por favor, gere o relatório primeiro.');
+            return;
+        }
+
+        const opt = {
+            margin: 10,
+            filename: `relatorio_biblioteca_${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+{% endblock %}

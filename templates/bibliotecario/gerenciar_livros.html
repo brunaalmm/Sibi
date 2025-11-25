@@ -1,0 +1,73 @@
+{% extends "bibliotecario/base_bibliotecario.html" %}
+{% block title %}Gerenciar Livros - Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Gerenciamento de Livros</h1>
+    </div>
+                    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Livros da Unidade: {{ session.get('unidade') }}</h5>
+            <a href="{{ url_for('gerenciar_livros.novo_livro') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Novo Livro
+            </a>
+        </div>
+        <div class="card-body">
+            {% if livros %}
+            <div class="row">
+                {% for livro in livros %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        {% if livro.capa %}
+                        <img src="{{ url_for('static', filename='uploads/capas/' + livro.capa) }}" 
+                             class="card-img-top" alt="{{ livro.titulo }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                             style="height: 200px;">
+                            <i class="bi bi-book display-4 text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ livro.titulo }}</h6>
+                            <p class="card-text small text-muted">
+                                <strong>Autor:</strong> {{ livro.autor }}<br>
+                                <strong>Gênero:</strong> {{ livro.genero }}<br>
+                                <strong>Quantidade:</strong> {{ livro.quantidade }}<br>
+                                <strong>ISBN:</strong> {{ livro.isbn }}
+                            </p>
+                            {% if livro.descricao %}
+                            <p class="card-text small">{{ livro.descricao[:100] }}{% if livro.descricao|length > 100 %}...{% endif %}</p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex w-100">
+                                <a href="{{ url_for('gerenciar_livros.editar_livro', id=livro.id) }}" 
+                                    class="btn btn-primary btn-sm w-50">
+                                        <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <form method="post" action="{{ url_for('gerenciar_livros.excluir_livro', id=livro.id) }}" class="w-50 m-0 p-0">
+                                    <button type="submit" class="btn btn-danger btn-sm w-100"
+                                        onclick="return confirm('Tem certeza que deseja excluir este livro?')">
+                                            <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-book display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Nenhum livro cadastrado</h4>
+                <p class="text-muted">Comece adicionando o primeiro livro à sua biblioteca.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,454 @@
+{% extends "aluno/base.html" %}
+
+{% block title %}Minha Estante - Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Minha Estante</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ url_for('catalogo') }}" class="btn btn-primary">
+                <i class="bi bi-book"></i> Buscar Mais Livros
+            </a>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ livros_emprestados|length }}</h3>
+                    <p class="text-muted mb-0">Emprestados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ livros_pendentes|length }}</h3>
+                    <p class="text-muted mb-0">Pendentes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-danger">{{ livros_atrasados|length }}</h3>
+                    <p class="text-muted mb-0">Atrasados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ livros_devolvidos|length }}</h3>
+                    <p class="text-muted mb-0">Devolvidos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abas de Navegação -->
+    <ul class="nav nav-tabs mb-4" id="estanteTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="emprestados-tab" data-bs-toggle="tab" data-bs-target="#emprestados" type="button" role="tab">
+                <i class="bi bi-book"></i> Emprestados ({{ livros_emprestados|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pendentes-tab" data-bs-toggle="tab" data-bs-target="#pendentes" type="button" role="tab">
+                <i class="bi bi-clock"></i> Pendentes ({{ livros_pendentes|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="atrasados-tab" data-bs-toggle="tab" data-bs-target="#atrasados" type="button" role="tab">
+                <i class="bi bi-exclamation-triangle"></i> Atrasados ({{ livros_atrasados|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="historico-tab" data-bs-toggle="tab" data-bs-target="#historico" type="button" role="tab">
+                <i class="bi bi-archive"></i> Histórico ({{ livros_devolvidos|length }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Conteúdo das Abas -->
+    <div class="tab-content" id="estanteTabsContent">
+        
+        <!-- ABA: LIVROS EMPRESTADOS -->
+        <div class="tab-pane fade show active" id="emprestados" role="tabpanel">
+            {% if livros_emprestados %}
+            <div class="row">
+                {% for agendamento in livros_emprestados %}
+                {% if agendamento.data_devolucao_prevista >= today %} <!-- Mostrar apenas não-atrasados aqui -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge bg-success">Emprestado</span>
+                            <small class="text-muted">
+                                {% if agendamento.renovacoes > 0 %}
+                                <i class="bi bi-arrow-repeat text-warning"></i> {{ agendamento.renovacoes }}x renovado
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- Capa e Informações Básicas -->
+                            <div class="text-center mb-3">
+                                {% if agendamento.livro.capa %}
+                                <img src="{{ url_for('static', filename='uploads/capas/' + agendamento.livro.capa) }}" 
+                                     class="img-fluid rounded" alt="{{ agendamento.livro.titulo }}"
+                                     style="max-height: 150px; object-fit: contain;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded" 
+                                     style="height: 150px;">
+                                    <i class="bi bi-book display-4 text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <h6 class="card-title">{{ agendamento.livro.titulo }}</h6>
+                            <p class="card-text small text-muted">
+                                <i class="bi bi-person"></i> {{ agendamento.livro.autor }}
+                            </p>
+                            
+                            <!-- Informações do Empréstimo -->
+                            <div class="emprestimo-info">
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-check"></i> 
+                                    <strong>Emprestado em:</strong> {{ agendamento.data_emprestimo.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-x"></i> 
+                                    <strong>Devolução:</strong> {{ agendamento.data_devolucao_prevista.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-building"></i> 
+                                    <strong>Unidade:</strong> {{ agendamento.livro.unidade }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="d-grid gap-2">
+                                {% if agendamento.renovacoes < 2 %}
+                                <button class="btn btn-warning btn-sm renovar-btn" data-agendamento-id="{{ agendamento.id }}">
+                                    <i class="bi bi-arrow-repeat"></i> Renovar ({{ 2 - agendamento.renovacoes }} restantes)
+                                </button>
+                                {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="bi bi-arrow-repeat"></i> Limite de renovações
+                                </button>
+                                {% endif %}
+                                
+                                <a href="{{ url_for('agendamento.agendamento_devolucao', agendamento_id=agendamento.id) }}" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="bi bi-calendar-check"></i> Agendar Devolução
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-book display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Nenhum livro emprestado</h4>
+                <p class="text-muted">Você não tem livros emprestados no momento.</p>
+                <a href="{{ url_for('catalogo') }}" class="btn btn-primary">
+                    <i class="bi bi-book"></i> Explorar Catálogo
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ABA: LIVROS PENDENTES -->
+        <div class="tab-pane fade" id="pendentes" role="tabpanel">
+            {% if livros_pendentes %}
+            <div class="row">
+                {% for agendamento in livros_pendentes %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <span class="badge bg-warning">Pendente</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                {% if agendamento.livro.capa %}
+                                <img src="{{ url_for('static', filename='uploads/capas/' + agendamento.livro.capa) }}" 
+                                     class="img-fluid rounded" alt="{{ agendamento.livro.titulo }}"
+                                     style="max-height: 150px; object-fit: contain;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded" 
+                                     style="height: 150px;">
+                                    <i class="bi bi-book display-4 text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <h6 class="card-title">{{ agendamento.livro.titulo }}</h6>
+                            <p class="card-text small text-muted">
+                                <i class="bi bi-person"></i> {{ agendamento.livro.autor }}
+                            </p>
+                            
+                            <div class="agendamento-info">
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar"></i> 
+                                    <strong>Data:</strong> {{ agendamento.data_agendamento.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-clock"></i> 
+                                    <strong>Horário:</strong> 
+                                    {% if agendamento.horario == 'manha' %}Manhã (9:30-10:40)
+                                    {% else %}Tarde (14:30-15:40){% endif %}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-building"></i> 
+                                    <strong>Unidade:</strong> {{ agendamento.livro.unidade }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="alert alert-info py-2">
+                                <i class="bi bi-info-circle"></i>
+                                <small>Aguardando confirmação do bibliotecário</small>
+                            </div>
+                            <small class="text-muted">
+                                Agendado em: {{ agendamento.data_criacao.strftime('%d/%m/%Y %H:%M') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-check-circle display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Nenhum agendamento pendente</h4>
+                <p class="text-muted">Todos os seus agendamentos foram processados.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ABA: LIVROS ATRASADOS -->
+        <div class="tab-pane fade" id="atrasados" role="tabpanel">
+            {% if livros_atrasados %}
+            <div class="row">
+                {% for agendamento in livros_atrasados %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 border-danger">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
+                            <span class="badge bg-white text-danger">Atrasado</span>
+                            <small>
+                                {% if agendamento.renovacoes > 0 %}
+                                <i class="bi bi-arrow-repeat"></i> {{ agendamento.renovacoes }}x renovado
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                {% if agendamento.livro.capa %}
+                                <img src="{{ url_for('static', filename='uploads/capas/' + agendamento.livro.capa) }}" 
+                                     class="img-fluid rounded" alt="{{ agendamento.livro.titulo }}"
+                                     style="max-height: 150px; object-fit: contain;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded" 
+                                     style="height: 150px;">
+                                    <i class="bi bi-book display-4 text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <h6 class="card-title">{{ agendamento.livro.titulo }}</h6>
+                            <p class="card-text small text-muted">
+                                <i class="bi bi-person"></i> {{ agendamento.livro.autor }}
+                            </p>
+                            
+                            <div class="emprestimo-info">
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-check"></i> 
+                                    <strong>Emprestado em:</strong> {{ agendamento.data_emprestimo.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1 text-danger">
+                                    <i class="bi bi-calendar-x"></i> 
+                                    <strong>Devolução prevista:</strong> {{ agendamento.data_devolucao_prevista.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-building"></i> 
+                                    <strong>Unidade:</strong> {{ agendamento.livro.unidade }}
+                                </p>
+                            </div>
+                            
+                            <div class="alert alert-danger py-2 mt-2">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Livro Atrasado!</strong>
+                                <p class="mb-0 small">Entre em contato com a biblioteca para regularizar sua situação.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="bi bi-arrow-repeat"></i> Não é possível renovar
+                                </button>
+                                
+                                <a href="{{ url_for('agendamento.agendamento_devolucao', agendamento_id=agendamento.id) }}" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="bi bi-calendar-check"></i> Agendar Devolução Urgente
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-check-circle display-1 text-success"></i>
+                <h4 class="text-success mt-3">Nenhum livro atrasado</h4>
+                <p class="text-muted">Parabéns! Todos os seus livros estão em dia.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ABA: HISTÓRICO -->
+        <div class="tab-pane fade" id="historico" role="tabpanel">
+            {% if livros_devolvidos %}
+            <div class="row">
+                {% for agendamento in livros_devolvidos %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <span class="badge bg-info">Devolvido</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                {% if agendamento.livro.capa %}
+                                <img src="{{ url_for('static', filename='uploads/capas/' + agendamento.livro.capa) }}" 
+                                     class="img-fluid rounded" alt="{{ agendamento.livro.titulo }}"
+                                     style="max-height: 150px; object-fit: contain;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded" 
+                                     style="height: 150px;">
+                                    <i class="bi bi-book display-4 text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <h6 class="card-title">{{ agendamento.livro.titulo }}</h6>
+                            <p class="card-text small text-muted">
+                                <i class="bi bi-person"></i> {{ agendamento.livro.autor }}
+                            </p>
+                            
+                            <div class="historico-info">
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-check"></i> 
+                                    <strong>Emprestado em:</strong> {{ agendamento.data_emprestimo.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-x"></i> 
+                                    <strong>Devolvido em:</strong> {{ agendamento.data_devolucao_real.strftime('%d/%m/%Y') }}
+                                </p>
+                                {% if agendamento.renovacoes > 0 %}
+                                <p class="small mb-1">
+                                    <i class="bi bi-arrow-repeat text-warning"></i> 
+                                    <strong>Renovações:</strong> {{ agendamento.renovacoes }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="d-grid">
+                                <a href="{{ url_for('detalhes_livro', livro_id=agendamento.livro.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-archive display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Nenhum livro no histórico</h4>
+                <p class="text-muted">Seus livros devolvidos aparecerão aqui.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.emprestimo-info, .agendamento-info, .historico-info {
+    border-left: 3px solid #0d6efd;
+    padding-left: 1rem;
+    margin: 1rem 0;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.border-danger {
+    border-width: 2px !important;
+}
+</style>
+
+<script>
+// Função para renovar empréstimo
+document.addEventListener('DOMContentLoaded', function() {
+    const renovarBtns = document.querySelectorAll('.renovar-btn');
+    
+    renovarBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const agendamentoId = this.getAttribute('data-agendamento-id');
+            
+            if (confirm('Deseja renovar o empréstimo por mais 7 dias?')) {
+                fetch(`/aluno/emprestimo/${agendamentoId}/renovar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Erro: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erro ao renovar empréstimo. Tente novamente.');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

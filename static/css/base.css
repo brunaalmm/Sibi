@@ -1,0 +1,660 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ===== RESET & BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    padding-top: 80px;
+    overflow-x: hidden;
+    background: #f8f9fa;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+/* ===== NAVBAR ===== */
+.custom-navbar {
+    background: linear-gradient(135deg, #BF1A2F, #B51F40, #992E73);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 80px;
+    transition: all 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1100;
+}
+
+.custom-navbar .navbar-brand img {
+    max-height: 50px;
+    border-radius: 6px;
+}
+
+/* ===== USER PROFILE ===== */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.welcome-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.welcome-text-line1 {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.welcome-text-line2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.profile-pic {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    bottom: 0;
+    background: white;
+    border-right: 1px solid #ced4da;
+    transition: all 0.3s ease;
+    padding: 1rem 0.75rem;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    z-index: 1050;
+    overflow-y: auto;
+}
+
+.sidebar .nav-flex-column {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.sidebar .nav-item {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    padding: 1rem 1rem;
+    text-decoration: none;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar .nav-link i {
+    margin-right: 12px;
+    font-size: 1.3rem;
+    color: #495057;
+    transition: all 0.2s ease;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.sidebar .menu-text {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(108, 117, 125, 0.1);
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(108, 117, 125, 0.15);
+    font-weight: 600;
+}
+
+/* ===== SIDEBAR MINIMIZADA ===== */
+.sidebar.minimized {
+    width: 80px !important;
+    padding: 1rem 0.5rem;
+    overflow-y: visible;
+    overflow-x: hidden; /* Adiciona isso para esconder scroll horizontal */
+}
+
+.sidebar.minimized:hover {
+    overflow-y: auto;
+}
+
+.sidebar.minimized .nav-link {
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    width: 100%; /* Garante que não ultrapasse */
+    max-width: 100%; /* Previne overflow */
+}
+
+.sidebar.minimized .nav-link i {
+    margin-right: 0;
+    font-size: 1.5rem;
+    width: 32px;
+    flex-shrink: 0; /* Impede que o ícone seja comprimido */
+}
+
+.sidebar.minimized .menu-text {
+    display: none !important;
+}
+
+/* Tooltip para sidebar minimizada */
+.sidebar.minimized .nav-link::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #495057;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 300;
+    margin-left: 10px;
+    pointer-events: none;
+    max-width: 200px; /* Limita largura do tooltip */
+    word-wrap: break-word;
+}
+
+.sidebar.minimized .nav-link:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Container dos itens da sidebar minimizada */
+.sidebar.minimized .nav-flex-column {
+    width: 100%;
+    align-items: center; /* Centraliza os itens */
+}
+
+.sidebar.minimized .nav-item {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centraliza o conteúdo */
+}
+
+/* Esconde scrollbar mas mantém funcionalidade */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Remove scrollbar horizontal globalmente */
+.sidebar {
+    overflow-x: hidden !important;
+}
+
+/* Para Firefox */
+.sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* ===== CONTEÚDO PRINCIPAL ===== */
+#main-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+    min-height: calc(100vh - 80px);
+}
+
+.sidebar.minimized ~ #main-content {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
+
+/* ===== BOTÕES DE CONTROLE ===== */
+.sidebar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Esconde o botão toggle no mobile pois agora temos navbar inferior */
+#sidebarToggle {
+    display: none !important;
+}
+
+#sidebarMinimize {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+#sidebarMinimize:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.minimized ~ .custom-navbar #sidebarMinimize i {
+    transform: rotate(180deg);
+}
+
+/* ===== OVERLAY PARA MOBILE ===== */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1049;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ===== NAVBAR INFERIOR PARA MOBILE ===== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #dee2e6;
+    padding: 0.5rem 0;
+    z-index: 1100;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+}
+
+.mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0;
+    text-decoration: none;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    min-height: 60px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.mobile-nav-item i {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.mobile-nav-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.mobile-nav-item.active {
+    color: #BF1A2F;
+}
+
+.mobile-nav-item.active i,
+.mobile-nav-item.active .mobile-nav-label {
+    color: #BF1A2F;
+}
+
+.mobile-nav-item:hover {
+    color: #495057;
+    background-color: rgba(108, 117, 125, 0.15);
+}
+
+/* ===== CORREÇÃO PARA NAVBAR EM TELAS MENORES (max-width: 990px) ===== */
+@media (max-width: 990px) {
+    .custom-navbar {
+        padding: 0 15px;
+    }
+    
+    .custom-navbar .navbar-brand img {
+        max-height: 40px;
+    }
+    
+    .sidebar-controls {
+        gap: 8px;
+    }
+    
+    #sidebarMinimize {
+        font-size: 1.3rem;
+        padding: 4px 8px;
+    }
+    
+    .user-profile {
+        gap: 8px;
+    }
+    
+    .welcome-text-line1 {
+        font-size: 12px;
+    }
+    
+    .welcome-text-line2 {
+        font-size: 14px;
+    }
+    
+    .profile-pic {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+/* ===== OTIMIZAÇÃO PARA TELAS MÉDIAS (max-width: 768px) ===== */
+@media (max-width: 768px) {
+    .welcome-text-container {
+        display: none;
+    }
+    
+    .custom-navbar .navbar-brand span {
+        font-size: 1rem;
+    }
+}
+
+/* ===== MOBILE (max-width: 850px) - SIDEBAR INFERIOR ===== */
+@media (max-width: 850px) {
+    body {
+        padding-top: 80px; /* Aumentei de 70px para 80px */
+        padding-bottom: 80px; /* Aumentei de 70px para 80px */
+        overflow-x: hidden;
+    }
+    
+    .custom-navbar {
+        height: 80px; /* Aumentei de 70px para 80px */
+        padding: 0 15px;
+    }
+    
+    .custom-navbar .navbar-brand {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .custom-navbar .navbar-brand img {
+        max-height: 45px; /* Aumentei de 35px para 45px */
+    }
+    
+    /* Esconde a sidebar lateral no mobile */
+    .sidebar {
+        display: none !important;
+    }
+    
+    /* Esconde o botão de minimizar no mobile */
+    #sidebarMinimize {
+        display: none !important;
+    }
+    
+    /* Mostra a navbar inferior */
+    .mobile-bottom-nav {
+        display: block;
+        height: 80px; /* Aumentei a altura da navbar inferior */
+        padding: 0.75rem 0; /* Aumentei o padding */
+    }
+    
+    /* Ajusta o conteúdo principal */
+    #main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 1.5rem 1rem;
+        padding-bottom: 2rem;
+        min-height: calc(100vh - 160px); /* Ajustei para 160px (80px top + 80px bottom) */
+    }
+    
+    .welcome-text-container {
+        display: none;
+    }
+    
+    .profile-pic {
+        width: 40px; /* Aumentei de 35px para 40px */
+        height: 40px;
+    }
+    
+    /* Remove overlay */
+    .overlay {
+        display: none !important;
+    }
+    
+    /* Ajusta os itens da navbar inferior para a nova altura */
+    .mobile-nav-item {
+        min-height: 70px; /* Aumentei de 60px para 70px */
+        padding: 0.75rem 0; /* Aumentei o padding */
+    }
+    
+    .mobile-nav-item i {
+        font-size: 1.5rem; /* Aumentei o tamanho dos ícones */
+        margin-bottom: 0.35rem; /* Ajustei o espaçamento */
+    }
+    
+    .mobile-nav-label {
+        font-size: 0.75rem; /* Aumentei um pouco a fonte */
+    }
+}
+
+/* ===== AJUSTES PARA TELAS MUITO PEQUENAS ===== */
+@media (max-width: 380px) {
+    .mobile-nav-item i {
+        font-size: 1.3rem;
+    }
+    
+    .mobile-nav-label {
+        font-size: 0.7rem;
+    }
+    
+    .mobile-nav-item {
+        padding: 0.6rem 0;
+        min-height: 65px;
+    }
+    
+    #main-content {
+        padding: 1rem 0.75rem;
+        padding-bottom: 1.5rem;
+    }
+    
+    .custom-navbar {
+        padding: 0 10px;
+    }
+    
+    .custom-navbar .navbar-brand img {
+        max-height: 40px;
+    }
+}
+
+/* ===== AJUSTES PARA TELAS GRANDES ===== */
+@media (min-width: 1200px) {
+    .sidebar {
+        width: 300px;
+    }
+    
+    #main-content {
+        margin-left: 300px;
+        width: calc(100% - 300px);
+    }
+    
+    .sidebar.minimized ~ #main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+}
+
+/* ===== ANIMAÇÕES SUAVES ===== */
+.sidebar,
+#main-content,
+.custom-navbar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-nav-item {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== MELHORIAS DE ACESSIBILIDADE ===== */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    #main-content,
+    .custom-navbar,
+    .mobile-nav-item {
+        transition: none;
+    }
+}
+
+/* ===== ESTADOS FOCUS PARA ACESSIBILIDADE ===== */
+.sidebar .nav-link:focus,
+.mobile-nav-item:focus,
+#sidebarMinimize:focus {
+    outline: 2px solid #BF1A2F;
+    outline-offset: 2px;
+}
+
+/* ===== MELHORIAS DE PERFORMANCE ===== */
+.sidebar {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+.mobile-bottom-nav {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+/* ===== FLASH MESSAGES STYLES (Consolidated from flash_messages.css) ===== */
+
+.flash-messages {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease-out;
+}
+
+.flash-badge {
+    margin-right: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+/* CORES DAS MENSAGENS */
+.flash-message.success {
+    background: #f0f9f0;
+    border: 1px solid #28a745;
+    color: #155724;
+}
+
+.flash-message.success .flash-badge {
+    background: #28a745;
+    color: white;
+}
+
+.flash-message.error {
+    background: #fdf2f2;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+.flash-message.error .flash-badge {
+    background: #dc3545;
+    color: white;
+}
+
+.flash-message.warning {
+    background: #fffbf0;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.flash-message.warning .flash-badge {
+    background: #ffc107;
+    color: #212529;
+}
+
+.flash-message.info {
+    background: #f0f8ff;
+    border: 1px solid #17a2b8;
+    color: #0c5460;
+}
+
+.flash-message.info .flash-badge {
+    background: #17a2b8;
+    color: white;
+}
+
+/* Animação */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

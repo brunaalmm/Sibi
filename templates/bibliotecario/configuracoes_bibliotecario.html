@@ -1,0 +1,173 @@
+{% extends "bibliotecario/base_bibliotecario.html" %}
+
+{% block title %}Configurações - Bibliotecário{% endblock %}
+
+{% block content %}
+<div class="container mt-3 pt-1">
+
+    <h3 class="fw-bold mb-2">Configurações</h3>
+    <p class="text-muted mb-3">Atualize suas informações abaixo</p>
+
+    <!-- Formulário -->
+    <form method="POST" enctype="multipart/form-data" class="row g-3">
+
+        <!-- Upload de Foto -->
+        <div class="col-12">
+            <label class="form-label fw-semibold">Foto de Perfil (Opcional)</label>
+            <div class="d-flex align-items-center gap-4">
+                <!-- Preview da Foto -->
+                <div class="position-relative">
+                    <img id="fotoPreview" 
+                         src="{{ url_for('static', filename=usuario.foto_perfil if usuario.foto_perfil else 'img/perfil.png') }}" 
+                         alt="Preview da Foto" 
+                         class="rounded-circle border" 
+                         style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+                
+                <!-- Input de Upload -->
+                <div class="flex-grow-1">
+                    <input type="file" name="foto_perfil" class="form-control" 
+                           accept="image/*" id="fotoInput">
+                    <div class="form-text">
+                        Opcional - Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 5MB.
+                        Deixe em branco para manter a foto atual.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nome -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Nome completo</label>
+            <input type="text" name="nome" class="form-control"
+                   value="{{ usuario.nome }}" required>
+        </div>
+
+        <!-- Email -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Novo e-mail</label>
+            <input type="email" name="email" class="form-control"
+                   value="{{ usuario.email }}" required>
+        </div>
+
+        <!-- Senha atual -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Senha atual</label>
+            <input type="password" name="senha_atual" class="form-control"
+                   placeholder="Digite apenas se quiser alterar a senha">
+            <div class="form-text text-muted">
+                Preencha apenas se desejar alterar sua senha.
+            </div>
+        </div>
+
+        <!-- Nova senha -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Nova senha (Opcional)</label>
+            <input type="password" name="senha" class="form-control"
+                   placeholder="Deixe em branco para manter a senha atual">
+            <div class="form-text text-muted">
+                Deixe em branco se não quiser alterar a senha.
+            </div>
+        </div>
+
+        <!-- Botão -->
+        <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bx bx-save me-1" style="font-size: 1.0rem;"></i> Atualizar
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fotoInput = document.getElementById('fotoInput');
+    const fotoPreview = document.getElementById('fotoPreview');
+    
+    if (fotoInput && fotoPreview) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Verificar tamanho do arquivo (5MB máximo)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('O arquivo é muito grande. Por favor, selecione uma imagem menor que 5MB.');
+                    fotoInput.value = '';
+                    return;
+                }
+                
+                // Verificar tipo do arquivo
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Por favor, selecione uma imagem nos formatos JPG, PNG ou GIF.');
+                    fotoInput.value = '';
+                    return;
+                }
+                
+                // Criar preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoPreview.src = e.target.result;
+                    
+                    // Atualizar também na navbar e modal se a função existir
+                    if (typeof updateProfilePicture === 'function') {
+                        updateProfilePicture(e.target.result);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    label {
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+    }
+
+    button.btn-primary i {
+        font-size: 1.1rem;
+        position: relative;
+        top: 1px;
+    }
+    
+    #fotoPreview {
+        transition: all 0.3s ease;
+    }
+    
+    #fotoPreview:hover {
+        transform: scale(1.05);
+    }
+    
+    .form-text {
+        font-size: 0.85rem;
+    }
+
+    input[type="file"].form-control {
+    cursor: pointer;
+    background: #f8f9fa;
+    }
+
+    input[type="file"].form-control::file-selector-button {
+    background: linear-gradient(135deg, #992E73, #B51F40);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    }
+
+    input[type="file"].form-control::file-selector-button:hover {
+    background: linear-gradient(135deg, #B51F40, #BF1A2F);
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends "aluno/base.html" %}
+{% block title %}Catálogo de Livros - Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Catálogo</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <small class="text-muted" id="contador-livros">{{ livros|length }} livro(s) encontrado(s)</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Pesquisa e Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Barra de Pesquisa -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" id="barra-pesquisa" class="form-control border-start-0"
+                                       placeholder="Pesquisar por título, autor ou descrição...">
+                                <button class="btn btn-outline-secondary" type="button" id="limpar-pesquisa">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Rápidos por Gênero -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-2" id="filtros-rapidos">
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido active" data-genero="">
+                                    <i class="bi bi-grid-3x3-gap"></i> Todos
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Romance">
+                                    💖 Romance
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Aventura">
+                                    🏹 Aventura
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Mistério">
+                                    🕵️ Mistério
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Fantasia">
+                                    🧙 Fantasia
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Ficção Científica">
+                                    🚀 Ficção Científica
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Poesia">
+                                    📜 Poesia
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Terror">
+                                    👻 Terror
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Comédia">
+                                    😂 Comédia
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Biografia">
+                                    📖 Biografia
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Infantil">
+                                    🧸 Infantil
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary filtro-rapido" data-genero="Juvenil">
+                                    🌟 Juvenil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catálogo de Livros -->
+    <div id="catalogo-container">
+        {% if livros %}
+        <div class="row" id="grid-livros">
+            {% for livro in livros %}
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-4 livro-card"
+                 data-titulo="{{ livro.titulo.lower() }}"
+                 data-autor="{{ livro.autor.lower() }}"
+                 data-descricao="{{ livro.descricao.lower() if livro.descricao else '' }}"
+                 data-genero="{{ livro.genero }}">
+                <a href="{{ url_for('detalhes_livro', livro_id=livro.id) }}" class="text-decoration-none">
+                    <div class="card h-100 shadow-sm card-clickable">
+                        <div class="position-relative" style="height: 250px; overflow: hidden;">
+                            {% if livro.capa %}
+                            <img src="{{ url_for('static', filename='uploads/capas/' + livro.capa) }}"
+                                 class="card-img-top h-100" alt="{{ livro.titulo }}"
+                                 style="object-fit: cover; width: 100%;">
+                            {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center h-100">
+                                <i class="bi bi-book display-4 text-muted"></i>
+                            </div>
+                            {% endif %}
+                           
+                            <!-- Badge de Disponibilidade -->
+                            <div class="position-absolute bottom-0 start-0 m-1">
+                                <span class="badge {% if livro.quantidade > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ livro.quantidade }} disponível{{ 's' if livro.quantidade > 1 else '' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-dark">{{ livro.titulo }}</h6>
+                            <p class="card-text text-muted small mb-1">
+                                <i class="bi bi-person"></i> {{ livro.autor }}
+                            </p>
+                           
+                            <!-- Gênero e Unidade -->
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                <span class="badge bg-primary">{{ livro.genero }}</span>
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span class="d-none d-md-inline">
+                                        {{ livro.unidade[:11] }}{% if livro.unidade|length > 11 %}...{% endif %}
+                                    </span>
+                                    <span class="d-md-none">
+                                        {{ livro.unidade }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5" id="nenhum-livro">
+            <i class="bi bi-book display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">Nenhum livro cadastrado</h4>
+            <p class="text-muted">Ainda não há livros cadastrados no sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Mensagem quando não encontrar resultados -->
+    <div id="nenhum-resultado" class="text-center py-5" style="display: none;">
+        <i class="bi bi-search display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">Nenhum livro encontrado</h4>
+        <p class="text-muted">Tente ajustar os termos da pesquisa ou filtros.</p>
+        <button class="btn btn-primary" id="limpar-filtros">
+            <i class="bi bi-arrow-clockwise"></i> Limpar Filtros
+        </button>
+    </div>
+</div>
+
+<style>
+.card-clickable {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.card-clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.card-img-top {
+    border-bottom: 1px solid #dee2e6;
+}
+
+a.text-decoration-none:hover {
+    text-decoration: none !important;
+}
+
+.badge {
+    font-size: 0.7em;
+    padding: 0.35em 0.65em;
+}
+
+.d-flex.gap-1 .badge {
+    margin-bottom: 0.25rem;
+}
+
+/* Estilos para a barra de pesquisa */
+#filtros-rapidos .btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+#filtros-rapidos .btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.livro-card {
+    transition: all 0.3s ease-in-out;
+}
+
+.livro-card.hidden {
+    display: none !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #filtros-rapidos {
+        gap: 0.5rem;
+    }
+   
+    #filtros-rapidos .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+   
+    .col-xl-2 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-xl-2, .col-lg-3, .col-md-4, .col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+   
+    #filtros-rapidos {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const barraPesquisa = document.getElementById('barra-pesquisa');
+    const filtrosRapidos = document.querySelectorAll('.filtro-rapido');
+    const limparPesquisa = document.getElementById('limpar-pesquisa');
+    const limparFiltros = document.getElementById('limpar-filtros');
+    const contadorLivros = document.getElementById('contador-livros');
+    const nenhumResultado = document.getElementById('nenhum-resultado');
+    const gridLivros = document.getElementById('grid-livros');
+    const nenhumLivro = document.getElementById('nenhum-livro');
+   
+    let livros = document.querySelectorAll('.livro-card');
+    let generoSelecionado = '';
+   
+    function filtrarLivros() {
+        const termoPesquisa = barraPesquisa.value.toLowerCase().trim();
+       
+        let livrosVisiveis = 0;
+       
+        livros.forEach(livro => {
+            const titulo = livro.getAttribute('data-titulo');
+            const autor = livro.getAttribute('data-autor');
+            const descricao = livro.getAttribute('data-descricao');
+            const genero = livro.getAttribute('data-genero');
+           
+            // CORREÇÃO: Verificar se algum campo contém o termo de pesquisa
+            const correspondePesquisa = !termoPesquisa ||
+                titulo.includes(termoPesquisa) ||
+                autor.includes(termoPesquisa) ||
+                (descricao && descricao.includes(termoPesquisa));
+           
+            const correspondeGenero = !generoSelecionado || genero === generoSelecionado;
+           
+            if (correspondePesquisa && correspondeGenero) {
+                livro.style.display = 'block';
+                livrosVisiveis++;
+            } else {
+                livro.style.display = 'none';
+            }
+        });
+       
+        // Atualizar contador
+        contadorLivros.textContent = `${livrosVisiveis} livro(s) encontrado(s)`;
+       
+        // Mostrar/ocultar mensagens
+        if (livrosVisiveis === 0) {
+            if (gridLivros) gridLivros.style.display = 'none';
+            if (nenhumLivro) nenhumLivro.style.display = 'none';
+            nenhumResultado.style.display = 'block';
+        } else {
+            if (gridLivros) gridLivros.style.display = 'flex';
+            if (nenhumLivro) nenhumLivro.style.display = 'none';
+            nenhumResultado.style.display = 'none';
+        }
+    }
+   
+    // Event Listeners
+    barraPesquisa.addEventListener('input', filtrarLivros);
+   
+    filtrosRapidos.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remover active de todos os botões
+            filtrosRapidos.forEach(b => b.classList.remove('active'));
+            // Adicionar active ao botão clicado
+            this.classList.add('active');
+            // Aplicar filtro
+            generoSelecionado = this.getAttribute('data-genero');
+            filtrarLivros();
+        });
+    });
+   
+    limparPesquisa.addEventListener('click', function() {
+        barraPesquisa.value = '';
+        filtrarLivros();
+        barraPesquisa.focus();
+    });
+   
+    limparFiltros.addEventListener('click', function() {
+        barraPesquisa.value = '';
+        generoSelecionado = '';
+        filtrosRapidos.forEach(btn => {
+            if (btn.getAttribute('data-genero') === '') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        filtrarLivros();
+    });
+   
+    // Filtrar ao carregar a página
+    filtrarLivros();
+});
+</script>
+{% endblock %}

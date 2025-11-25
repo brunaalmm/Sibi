@@ -1,0 +1,151 @@
+{% extends "bibliotecario/base_bibliotecario.html" %}
+
+{% block title %}Início - Bibliotecário{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+
+    <h2 class="fw-bold mt-3 mb-4">PAINEL INICIAL - {{ session.unidade }}</h2>
+
+    <!-- CARDS SUPERIORES -->
+    <div class="row g-3 mb-4">
+
+        <!-- Alunos -->
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3 text-center">
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <i class="bx bx-user-plus" style="font-size: 2.2rem;"></i>
+                    <h3 class="m-0">{{ total_alunos }}</h3>
+                </div>
+                <small class="text-muted d-block mt-2">ALUNOS</small>
+            </div>
+        </div>
+
+        <!-- Livros -->
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3 text-center">
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <i class="bx bx-book-add" style="font-size: 2.2rem;"></i>
+                    <h3 class="m-0">{{ total_livros }}</h3>
+                </div>
+                <small class="text-muted d-block mt-2">LIVROS</small>
+            </div>
+        </div>
+
+        <!-- Emprestados -->
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3 text-center">
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <i class="bx bx-arrow-to-top" style="font-size: 2.2rem;"></i>
+                    <h3 class="m-0">{{ total_emprestados }}</h3>
+                </div>
+                <small class="text-muted d-block mt-2">EMPRESTADOS</small>
+            </div>
+        </div>
+
+        <!-- Relatórios -->
+        <div class="col-md-3">
+            <a href="/relatorios/bibliotecario/relatorios" class="text-decoration-none">
+                <div class="card shadow-sm p-3 text-center bg-light">
+                    <i class="bx bx-bar-chart-alt" style="font-size: 2.2rem;"></i>
+                    <h5 class="mt-2 fw-bold">VER RELATÓRIOS</h5>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- TABELAS INFERIORES -->
+    <div class="row g-4">
+
+        <!-- Últimos empréstimos -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">ÚLTIMOS EMPRÉSTIMOS</div>
+
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Aluno</th>
+                                <th>Data</th>
+                                <th>Prazo de Devolução</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if ultimos_emprestimos %}
+                                {% for emp in ultimos_emprestimos %}
+                                <tr>
+                                    <td>{{ emp.aluno.nome }}</td>
+                                    <td>{{ emp.data_emprestimo.strftime('%d-%m-%Y') }}</td>
+                                    <td>{{ emp.data_devolucao_prevista.strftime('%d-%m-%Y') }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">Nenhum empréstimo recente.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-2">
+                    <a href="/bibliotecario/agenda" 
+                       class="fw-bold text-primary" 
+                       style="color:#0d6efd!important;">
+                        Ver todos empréstimos
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Alunos com atraso -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">ALUNOS COM ATRASOS</div>
+
+                <div class="p-4 text-center">
+                    {% if atrasados %}
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Aluno</th>
+                                    <th>Livro</th>
+                                    <th>Devolução</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for atr in atrasados %}
+                                <tr>
+                                    <td>{{ atr.usuario.nome }}</td>
+                                    <td>{{ atr.livro.titulo }}</td>
+                                    <td>{{ atr.data_devolucao_prevista.strftime('%d-%m-%Y') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="border border-success text-success fw-bold py-3" style="border-radius: 8px;">
+                            NENHUM ATRASO!
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-2">
+                    <a href="/bibliotecario/agenda" 
+                       class="fw-bold text-primary" 
+                       style="color:#0d6efd!important;">
+                        Ver todos atrasos
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

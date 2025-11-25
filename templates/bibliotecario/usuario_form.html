@@ -1,0 +1,86 @@
+{% extends "bibliotecario/base_bibliotecario.html" %}
+{% block title %}{{ "Novo Usuário" if not usuario else "Editar Usuário" }} - Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ "Cadastrar Novo Usuário" if not usuario else "Editar Usuário" }}</h1>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+
+                    <form method="POST" 
+                        action="{{ url_for('gerenciar_usuarios.salvar_usuario' if not usuario else 'gerenciar_usuarios.atualizar_usuario') }}">
+                        
+                        {% if usuario %}
+                        <input type="hidden" name="id" value="{{ usuario.id }}">
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nome" class="form-label">Nome Completo</label>
+                                <input type="text" name="nome" id="nome" class="form-control"
+                                value="{{ usuario.nome if usuario else '' }}" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" name="email" id="email" class="form-control"
+                                value="{{ usuario.email if usuario else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="senha" class="form-label">
+                                    {{ "Nova Senha" if usuario else "Senha" }}
+                                </label>
+                                <input type="password" name="senha" id="senha" class="form-control" 
+                                       {% if not usuario %}required{% endif %}>
+                                {% if usuario %}
+                                <small class="form-text text-muted">Deixe vazio para manter a senha atual.</small>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="tipo_usuario" class="form-label">Tipo de Usuário</label>
+                                <select name="tipo_usuario" id="tipo_usuario" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Aluno" {{ 'selected' if usuario and usuario.tipo_usuario == 'Aluno' else '' }}>Aluno</option>
+                                    <option value="Bibliotecario" {{ 'selected' if usuario and usuario.tipo_usuario == 'Bibliotecario' else '' }}>Bibliotecário</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="unidade" class="form-label">Unidade</label>
+                            <select name="unidade" id="unidade" class="form-select" required>
+                                <option value="">Selecione a unidade...</option>
+                                {% for unidade in unidades %}
+                                <option value="{{ unidade }}" 
+                                    {{ 'selected' if usuario and usuario.unidade == unidade else '' }}>
+                                    {{ unidade }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> 
+                                {{ "Cadastrar" if not usuario else "Atualizar" }}
+                            </button>
+                            <a href="{{ url_for('gerenciar_usuarios.gerenciar_usuarios') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

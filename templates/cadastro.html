@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="min-height: 100vh; overflow-x: hidden;">
+<div class="container">
+    <!-- Painel lateral -->
+    <div class="side-panel">
+        <div class="toggle-panel">
+            <img src="{{ url_for('static', filename='img/logo-2.png') }}" alt="Logo" class="logo">
+        </div>
+    </div>
+
+    <div class="form-wrapper">
+        <div class="form-container">
+            <h1>Cadastro</h1>
+            
+            <!-- MENSAGENS FLASH -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                <span class="flash-badge">
+                                    {% if category == 'success' %}Success
+                                    {% elif category == 'error' %}Error
+                                    {% elif category == 'warning' %}Warning
+                                    {% else %}Informação{% endif %}
+                                </span>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="form-content">
+                    <div class="input-box">
+                        <span class="input-title">Digite seu nome completo</span>
+                        <input type="text" name="nome" placeholder="Nome" required>
+                    </div>
+
+                    <div class="input-box">
+                        <span class="input-title">Digite seu e-mail</span>
+                        <input type="email" name="email" placeholder="Email" required>
+                    </div>
+
+                    <div class="input-box">
+                        <span class="input-title">Digite sua senha</span>
+                        <input type="password" name="senha" placeholder="Senha" required>
+                    </div>
+
+                    <div class="user-type">
+                        <label><input type="radio" name="tipo_usuario" value="Bibliotecario" required> Bibliotecário</label>
+                        <label><input type="radio" name="tipo_usuario" value="Aluno" required> Aluno</label>
+                    </div>
+
+                    <div class="input-box">
+                        <span class="input-title">Escolha a unidade</span>
+                        <select name="unidade" required>
+                            <option value="" disabled selected>Selecione uma unidade</option>
+                            {% for uni in unidades %}
+                                <option value="{{ uni }}">{{ uni }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Cadastrar-se</button>
+            </form>
+            <br>
+            <p>Já tem uma conta? <a href="{{ url_for('login') }}" class="toggle-btn">Login</a></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

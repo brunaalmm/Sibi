@@ -1,0 +1,324 @@
+{% extends "aluno/base.html" %}
+{% block title %}Agendar Devolução - {{ livro.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div>
+            <a href="{{ url_for('agendamento.estante_aluno') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar para Estante
+            </a>
+        </div>
+        <h1 class="h2">Agendar Devolução</h1>
+        <div></div>
+    </div>
+
+    <div class="row">
+        <!-- Informações do Livro -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Livro para Devolução</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if livro.capa %}
+                    <img src="{{ url_for('static', filename='uploads/capas/' + livro.capa) }}" 
+                         class="img-fluid rounded mb-3" alt="{{ livro.titulo }}"
+                         style="max-height: 200px; object-fit: contain;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded mb-3" 
+                         style="height: 150px;">
+                        <i class="bi bi-book display-4 text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <h6>{{ livro.titulo }}</h6>
+                    <p class="text-muted small">por {{ livro.autor }}</p>
+                    <p class="small"><strong>Unidade:</strong> {{ livro.unidade }}</p>
+                    <p class="small"><strong>Data de devolução prevista:</strong> 
+                        {{ agendamento_original.data_devolucao_prevista.strftime('%d/%m/%Y') }}</p>
+                    {% if agendamento_original.data_devolucao_prevista < today %}
+                    <div class="alert alert-danger mt-2">
+                        <small><i class="bi bi-exclamation-triangle"></i> Livro em atraso</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Informações Importantes -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações da Devolução</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-clock"></i> Horários de Devolução</h6>
+                        <ul class="list-unstyled small mb-0">
+                            <li><strong>Manhã:</strong> 9:30 às 10:40</li>
+                            <li><strong>Tarde:</strong> 14:30 às 15:40</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-building"></i> Local de Devolução</h6>
+                        <p class="mb-0 small">{{ livro.unidade }}</p>
+                    </div>
+                    <div class="alert alert-success">
+                        <h6><i class="bi bi-check-circle"></i> Condições</h6>
+                        <p class="mb-0 small">Livro em bom estado e sem pendências</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Agendamento -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Escolher Data e Horário para Devolução</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formAgendamentoDevolucao">
+                        <input type="hidden" name="agendamento_emprestimo_id" value="{{ agendamento_original.id }}">
+                        <input type="hidden" name="tipo_agendamento" value="devolucao">
+                        
+                        <!-- Seleção de Data -->
+                        <div class="mb-4">
+                            <label class="form-label"><strong>Selecione a Data de Devolução:</strong></label>
+                            <div class="row">
+                                {% for data in datas_disponiveis %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="data_agendamento" 
+                                               id="data{{ loop.index }}" value="{{ data.formatada }}"
+                                               required>
+                                        <label class="form-check-label" for="data{{ loop.index }}">
+                                            <strong>{{ data.dia_semana }}</strong><br>
+                                            <small class="text-muted">{{ data.formatada }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Seleção de Horário -->
+                        <div class="mb-4">
+                            <label class="form-label"><strong>Selecione o Horário de Devolução:</strong></label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card horario-card">
+                                        <div class="card-body text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="horario" 
+                                                       id="horarioManha" value="manha" required>
+                                                <label class="form-check-label" for="horarioManha">
+                                                    <h6><i class="bi bi-sun text-warning"></i> Manhã</h6>
+                                                    <p class="text-muted small mb-0">9:30 às 10:40</p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card horario-card">
+                                        <div class="card-body text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="horario" 
+                                                       id="horarioTarde" value="tarde" required>
+                                                <label class="form-check-label" for="horarioTarde">
+                                                    <h6><i class="bi bi-moon text-primary"></i> Tarde</h6>
+                                                    <p class="text-muted small mb-0">14:30 às 15:40</p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botão de Confirmação -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-calendar-check"></i> Confirmar Agendamento de Devolução
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Status do Processo -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6>Como funciona a devolução:</h6>
+                    <div class="steps">
+                        <div class="step completed">
+                            <span class="step-number">1</span>
+                            <span class="step-text">Livro emprestado</span>
+                        </div>
+                        <div class="step active">
+                            <span class="step-number">2</span>
+                            <span class="step-text">Agendar devolução</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span class="step-text">Aguardar confirmação</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span class="step-text">Devolver na biblioteca</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Sucesso -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-success"><i class="bi bi-check-circle"></i> Devolução Agendada!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Sua devolução foi agendada com sucesso!</p>
+                <p class="mb-0">Agora aguarde a confirmação do bibliotecário. Você pode acompanhar o status na sua agenda.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ url_for('agendamento.estante_aluno') }}" class="btn btn-primary">
+                    <i class="bi bi-bookshelf"></i> Voltar para Estante
+                </a>
+                <a href="{{ url_for('agendamento.minha_agenda') }}" class="btn btn-secondary">
+                    <i class="bi bi-calendar-week"></i> Ver Minha Agenda
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: 1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dee2e6;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.step.completed .step-number {
+    background-color: #198754;
+    color: white;
+}
+
+.step.active .step-number {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.step-text {
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.horario-card {
+    cursor: pointer;
+}
+
+.form-check-input:checked + .form-check-label .horario-card {
+    border-color: #198754;
+    background-color: #f8f9fa;
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 80px) !important;
+    margin-top: 40px;
+}
+</style>
+
+<script>
+document.getElementById('formAgendamentoDevolucao').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('{{ url_for("agendamento.salvar_agendamento") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar modal de sucesso
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao agendar devolução. Tente novamente.');
+    });
+});
+
+// Melhorar UX dos cards de horário
+document.querySelectorAll('.horario-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) {
+            radio.checked = true;
+            // Atualizar visualmente todos os cards
+            document.querySelectorAll('.horario-card').forEach(c => {
+                c.style.borderColor = '';
+                c.style.backgroundColor = '';
+            });
+            // Destacar card selecionado
+            this.style.borderColor = '#198754';
+            this.style.backgroundColor = '#f8f9fa';
+        }
+    });
+});
+</script>
+{% endblock %}

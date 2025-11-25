@@ -1,0 +1,370 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* RESET E FONTES */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+
+/* CONTAINER PRINCIPAL FULLSCREEN */
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  background: #fff;
+  overflow: auto;
+}
+
+.side-panel {
+  width: 50%;
+  height: 100vh;
+  background: linear-gradient(135deg, #BF1A2F, #B51F40, #992E73);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  text-align: center;
+  padding: 40px;
+  position: sticky;
+  top: 0;
+}
+
+.side-panel .logo {
+  max-width: 60%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+/* WRAPPER EXTERNO DO FORMULÁRIO */
+.form-wrapper {
+  width: 50%;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0; 
+  min-height: 100vh;
+}
+
+/* FORMULÁRIO INTERNO */
+.form-container {
+  width: 400px;
+  max-width: 450px;
+  background: #fff;
+  padding: 30px 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-container p {
+  text-align: center;
+}
+
+/* CONTEÚDO DO FORM */
+.form-container .form-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* REDUZIDO: gap */
+}
+
+.form-container h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px; /* REDUZIDO: margin */
+  text-align: center;
+  color: #111;
+}
+
+/* TEXTO ACIMA DOS INPUTS */
+.input-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.input-box {
+  position: relative;
+  width: 100%;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  color: #333;
+  background: #fafafa;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+/* SELECT COM FLECHINHA PERSONALIZADA */
+.input-box select {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  color: #333;
+  background: #fafafa;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23992E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.input-box input:focus,
+.input-box select:focus {
+  border-color: #992E73;
+  box-shadow: 0 0 6px rgba(153, 46, 115, 0.3);
+  background: #fff;
+}
+
+.user-type {
+  display: flex;
+  gap: 12px;
+  margin: 5px 0;
+}
+
+.user-type label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+}
+
+.user-type input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #992E73;
+  border-radius: 50%;
+  margin-right: 8px;
+  transition: all 0.3s ease;
+}
+
+.user-type input[type="radio"]:checked {
+  background: radial-gradient(circle at center, #992E73 45%, transparent 46%);
+  border-color: #992E73;
+  box-shadow: 0 0 0 3px rgba(153, 46, 115, 0.2);
+}
+
+/* BOTÃO */
+.btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #992E73, #B51F40);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+  margin-top: 10px; /* REDUZIDO: margin */
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(153, 46, 115, 0.3);
+}
+
+/* LINK CADASTRO/LOGIN */
+.toggle-btn {
+  color: #992E73;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* ERRO */
+.erro {
+  color: red;
+  margin-bottom: 10px;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 850px) {
+  .container {
+    flex-direction: column;
+    width: 100vw;
+    height: auto;
+    position: relative;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+
+  .side-panel {
+    order: -1;
+    width: 100%;
+    height: 40vh;
+    padding: 30px 25px; /* REDUZIDO: padding */
+    box-sizing: border-box;
+    position: relative;
+    min-height: 200px; /* REDUZIDO: altura mínima */
+  }
+
+  .form-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 15px; /* REDUZIDO: padding */
+    box-sizing: border-box;
+    min-height: 60vh;
+    align-items: flex-start;
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px 15px; /* REDUZIDO: padding */
+  }
+
+  .form-container .form-content {
+    gap: 18px; /* REDUZIDO: gap */
+  }
+
+  .form-container h1 {
+    font-size: 28px;
+    margin-bottom: 15px; /* REDUZIDO: margin */
+  }
+
+  .btn {
+    font-size: 15px;
+    margin-top: 15px; /* REDUZIDO: margin */
+  }
+
+  /* Select em mobile */
+  .input-box select {
+    font-size: 16px;
+    padding: 16px;
+    padding-right: 40px;
+  }
+}
+
+/* GARANTIR QUE O SCROLL FUNCIONE EM MOBILE */
+@media (max-width: 850px) {
+  html, body {
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+.form-wrapper {
+  align-items: center !important;
+}
+
+.form-container {
+  margin: 0 auto !important;
+}
+
+/* MENSAGENS FLASH - ESTILO SIMPLES */
+.flash-messages {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease-out;
+}
+
+.flash-badge {
+    margin-right: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+/* CORES DAS MENSAGENS */
+.flash-message.success {
+    background: #f0f9f0;
+    border: 1px solid #28a745;
+    color: #155724;
+}
+
+.flash-message.success .flash-badge {
+    background: #28a745;
+    color: white;
+}
+
+.flash-message.error {
+    background: #fdf2f2;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+.flash-message.error .flash-badge {
+    background: #dc3545;
+    color: white;
+}
+
+.flash-message.warning {
+    background: #fffbf0;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.flash-message.warning .flash-badge {
+    background: #ffc107;
+    color: #212529;
+}
+
+.flash-message.info {
+    background: #f0f8ff;
+    border: 1px solid #17a2b8;
+    color: #0c5460;
+}
+
+.flash-message.info .flash-badge {
+    background: #17a2b8;
+    color: white;
+}
+
+/* Animação */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

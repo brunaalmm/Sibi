@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema Biblioteca - Bibliotecário{% endblock %}</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Boxicons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar fixed-top">
+        <div class="container-fluid">
+            <!-- Logo - Ocupa espaço flexível à esquerda -->
+            <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
+                <a class="navbar-brand" href="{{ url_for('home_bibliotecario') }}">
+                    <img src="{{ url_for('static', filename='img/logo-simples-horizontal.png') }}" alt="Logo Biblioteca" style="max-height: 40px; width: auto;">
+                </a>
+            </div>
+            
+            <!-- Controles da sidebar - Centralizado em desktop -->
+            <div class="sidebar-controls d-none d-lg-flex flex-grow-1">
+                <button class="btn" id="sidebarMinimize" type="button">
+                    <i class="bi bi-chevron-left fs-3 text-white"></i>
+                </button>
+            </div>
+
+            
+            <!-- Área do usuário - Alinhada à direita -->
+            <div class="d-flex align-items-center flex-grow-0">
+                <!-- Foto de Perfil (Sem link) -->
+                <div class="me-2" title="Perfil">
+                    <img src="{{ url_for('static', filename=user_data.foto_perfil if user_data and user_data.foto_perfil else 'img/perfil.png') }}" 
+                         alt="Foto de Perfil" class="profile-pic" id="navbarProfilePic">
+                </div>
+
+                <!-- Botão de Sair -->
+                <a href="{{ url_for('logout') }}" class="btn" title="Sair">
+                    <i class="bi bi-box-arrow-right fs-4 text-white"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home_bibliotecario') }}" title="Home">
+                        <i class='bx bx-home-alt'></i>
+                        <span class="menu-text">Início</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('gerenciar_livros') }}" title="Livros">
+                        <i class='bx bx-book-add'></i>
+                        <span class="menu-text">Livros</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('gerenciar_usuarios') }}" title="Usuários">
+                        <i class='bx bx-user-plus'></i>
+                        <span class="menu-text">Usuários</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('agenda_bibliotecario') }}" title="Agenda">
+                        <i class="bi bi-calendar-week"></i>
+                        <span class="menu-text">Agenda</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('relatorios.relatorios') }}" title="Relatórios">
+                        <i class='bx bx-bar-chart-alt-2'></i>
+                        <span class="menu-text">Relatórios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('configuracoes_bibliotecario') }}" title="Configurações">
+                        <i class='bx bx-cog'></i>
+                        <span class="menu-text">Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Navbar inferior para Mobile -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-container">
+            <a href="{{ url_for('home_bibliotecario') }}" class="mobile-nav-item {% if request.endpoint == 'home_bibliotecario' %}active{% endif %}">
+                <i class='bx bx-home-alt'></i>
+                <span class="mobile-nav-label">Início</span>
+            </a>
+            <a href="{{ url_for('gerenciar_livros') }}" class="mobile-nav-item {% if request.endpoint == 'gerenciar_livros' %}active{% endif %}">
+                <i class='bx bx-book-add'></i>
+                <span class="mobile-nav-label">Livros</span>
+            </a>
+            <a href="{{ url_for('gerenciar_usuarios') }}" class="mobile-nav-item {% if request.endpoint == 'gerenciar_usuarios' %}active{% endif %}">
+                <i class='bx bx-user-plus'></i>
+                <span class="mobile-nav-label">Usuários</span>
+            </a>
+            <a href="{{ url_for('agenda_bibliotecario') }}" class="mobile-nav-item {% if request.endpoint == 'agenda_bibliotecario' %}active{% endif %}">
+                <i class="bi bi-calendar-week"></i>
+                <span class="mobile-nav-label">Agen.</span>
+            </a>
+            <a href="{{ url_for('relatorios.relatorios') }}" class="mobile-nav-item {% if request.endpoint == 'relatorios' %}active{% endif %}">
+                <i class='bx bx-bar-chart-alt-2'></i>
+                <span class="mobile-nav-label">Relat.</span>
+            </a>
+            <a href="{{ url_for('configuracoes_bibliotecario') }}" class="mobile-nav-item {% if request.endpoint == 'configuracoes_bibliotecario' %}active{% endif %}">
+                <i class='bx bx-cog'></i>
+                <span class="mobile-nav-label">Config.</span>
+            </a>
+        </div>
+    </nav>
+
+	    <!-- Conteúdo Principal -->
+	    <main id="main-content" class="px-md-4">
+	        <!-- Bloco de Mensagens Flash -->
+	        <div class="flash-messages">
+	            {% with messages = get_flashed_messages(with_categories=true) %}
+	                {% if messages %}
+	                    {% for category, message in messages %}
+	                        <div class="flash-message {{ category }}">
+	                            <span class="flash-badge">{{ category.upper() }}</span>
+	                            {{ message }}
+	                        </div>
+	                    {% endfor %}
+	                {% endif %}
+	            {% endwith %}
+	        </div>
+	        <!-- Fim do Bloco de Mensagens Flash -->
+	        {% block content %}{% endblock %}
+	    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Javascript do Menu Lateral -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarMinimize = document.getElementById('sidebarMinimize');
+        
+        // Verificar estado salvo no localStorage
+        const isMinimized = localStorage.getItem('sidebarMinimized') === 'true';
+        
+        // Aplicar estado salvo
+        if (isMinimized && sidebar) {
+            sidebar.classList.add('minimized');
+        }
+        
+        // Controle de minimizar/maximizar
+        if (sidebarMinimize && sidebar) {
+            sidebarMinimize.addEventListener('click', function() {
+                sidebar.classList.toggle('minimized');
+                
+                // Salvar estado no localStorage
+                const isNowMinimized = sidebar.classList.contains('minimized');
+                localStorage.setItem('sidebarMinimized', isNowMinimized);
+                
+                // Atualizar ícone
+                updateMinimizeIcon();
+            });
+        }
+        
+        // Função para atualizar o ícone do botão
+        function updateMinimizeIcon() {
+            if (sidebarMinimize && sidebar) {
+                const icon = sidebarMinimize.querySelector('i');
+                if (sidebar.classList.contains('minimized')) {
+                    icon.className = 'bi bi-chevron-right fs-3 text-white';
+                } else {
+                    icon.className = 'bi bi-chevron-left fs-3 text-white';
+                }
+            }
+        }
+        
+        // Inicializar ícone
+        updateMinimizeIcon();
+
+        // Função para atualizar foto de perfil em todos os lugares
+        window.updateProfilePicture = function(imageUrl) {
+            // Atualizar na navbar
+            const navbarPic = document.getElementById('navbarProfilePic');
+            if (navbarPic) {
+                navbarPic.src = imageUrl;
+            }
+            
+            // Atualizar preview no formulário se existir
+            const previewPic = document.getElementById('fotoPreview');
+            if (previewPic) {
+                previewPic.src = imageUrl;
+            }
+        }
+    });
+    </script>
+
+    <style>
+    /* Ajustes de responsividade para a navbar */
+    @media (max-width: 991.98px) {
+        .sidebar-controls {
+            display: none !important;
+        }
+        
+        .navbar-brand {
+            margin-right: auto;
+        }
+        
+        .container-fluid {
+            flex-wrap: nowrap;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .navbar-brand img {
+            max-height: 35px;
+        }
+        
+        .profile-pic {
+            width: 35px;
+            height: 35px;
+        }
+    }
+
+    /* Garantir que a logo não seja sobreposta */
+    .navbar-brand {
+        z-index: 1;
+    }
+
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #fff;
+    }
+    
+    /* Ajuste para o botão de perfil no mobile */
+    @media (max-width: 576px) {
+        .profile-pic {
+            width: 35px;
+            height: 35px;
+        }
+    }
+    </style>
+</body>
+</html>

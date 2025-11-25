@@ -1,0 +1,496 @@
+{% extends "aluno/base.html" %}
+{% block title %}Minha Agenda - Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Minha Agenda</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ url_for('catalogo') }}" class="btn btn-primary">
+                <i class="bi bi-book"></i> Buscar Mais Livros
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendário -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Calendário de Agendamentos</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary" id="prevMonth">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="nextMonth">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            <div class="card-body py-2 border-bottom">
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <div class="d-flex align-items-center">
+                        <div class="event-dot pendente me-2"></div>
+                        <small>Pendente</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="event-dot emprestado me-2"></div>
+                        <small>Emprestado</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="event-dot devolucao_agendada me-2"></div>
+                        <small>Devolução Agendada</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="event-dot devolvido me-2"></div>
+                        <small>Devolvido</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="event-dot cancelado me-2"></div>
+                        <small>Cancelado</small>
+                    </div>
+                </div>
+            </div>
+                <div class="card-body">
+                    <div id="calendar" class="calendar-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Agendamentos -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0" id="listaTitulo">Clique em uma data para ver os agendamentos</h5>
+        </div>
+        <div class="card-body">
+            {% if agendamentos %}
+            <div class="row" id="agendamentosContainer">
+                {% for agendamento in agendamentos or [] %}
+                <div class="col-12 col-sm-6 col-lg-4 mb-4 agendamento-card"
+                     data-status="{{ agendamento.status }}"
+                     data-date="{{ agendamento.data_agendamento.strftime('%Y-%m-%d') }}"
+                     style="display: none;">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge
+                                {% if agendamento.status == 'pendente' %}bg-warning
+                                {% elif agendamento.status == 'emprestado' %}bg-success
+                                {% elif agendamento.status == 'devolvido' %}bg-info
+                                {% elif agendamento.status == 'devolucao_agendada' %}bg-primary
+                                {% else %}bg-secondary{% endif %}">
+                                {{ agendamento.status|title }}
+                            </span>
+                            <small class="text-muted">#{{ agendamento.id }}</small>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">{{ agendamento.livro.titulo }}</h6>
+                            <p class="card-text small text-muted">
+                                <i class="bi bi-person"></i> {{ agendamento.livro.autor }}
+                            </p>
+                           
+                            <div class="agendamento-info">
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar"></i>
+                                    <strong>Data:</strong> {{ agendamento.data_agendamento.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-clock"></i>
+                                    <strong>Horário:</strong>
+                                    {% if agendamento.horario == 'manha' %}Manhã (9:30-10:40)
+                                    {% else %}Tarde (14:30-15:40){% endif %}
+                                </p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-building"></i>
+                                    <strong>Unidade:</strong> {{ agendamento.livro.unidade }}
+                                </p>
+                               
+                                {% if agendamento.status == 'emprestado' and agendamento.data_devolucao_prevista %}
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <strong>Devolução:</strong> {{ agendamento.data_devolucao_prevista.strftime('%d/%m/%Y') }}
+                                </p>
+                                {% endif %}
+                               
+                                {% if agendamento.data_emprestimo %}
+                                <p class="small mb-1">
+                                    <i class="bi bi-check-circle"></i>
+                                    <strong>Emprestado em:</strong> {{ agendamento.data_emprestimo.strftime('%d/%m/%Y %H:%M') }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">
+                                Agendado em: {{ agendamento.data_criacao.strftime('%d/%m/%Y %H:%M') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Nenhum agendamento</h4>
+                <p class="text-muted">Você ainda não fez nenhum agendamento.</p>
+                <a href="{{ url_for('catalogo') }}" class="btn btn-primary">
+                    <i class="bi bi-book"></i> Explorar Catálogo
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-container {
+    font-family: Arial, sans-serif;
+    overflow-x: auto;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    min-width: 300px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px 4px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 10px 2px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 60px;
+    position: relative;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.calendar-day:hover {
+    background-color: #f8f9fa;
+}
+
+.calendar-day.other-month {
+    color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+.calendar-day.has-events {
+    background-color: #e7f3ff;
+    border-color: #0d6efd;
+}
+
+.calendar-day.selected {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.calendar-day.today {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+.event-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    margin-top: 2px;
+}
+
+.event-dot.pendente { background-color: #ffc107; }
+.event-dot.emprestado { background-color: #198754; }
+.event-dot.devolvido { background-color: #0dcaf0; }
+.event-dot.devolucao_agendada { background-color: #6f42c1; }
+.event-dot.cancelado { background-color: #6c757d; }
+
+.agendamento-card .card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.agendamento-card .card:hover {
+    transform: translateY(-3px);
+}
+
+.agendamento-info {
+    border-left: 3px solid #0d6efd;
+    padding-left: 0.75rem;
+    margin: 0.75rem 0;
+}
+
+/* Responsividade */
+@media (max-width: 576px) {
+    .calendar-grid {
+        gap: 2px;
+        min-width: 280px;
+    }
+   
+    .calendar-day-header {
+        padding: 6px 2px;
+        font-size: 0.7rem;
+    }
+   
+    .calendar-day {
+        padding: 8px 1px;
+        min-height: 50px;
+        font-size: 0.8rem;
+    }
+   
+    .calendar-header h4 {
+        font-size: 1.1rem;
+    }
+   
+    .event-dot {
+        width: 5px;
+        height: 5px;
+    }
+   
+    .card-header h5 {
+        font-size: 1rem;
+    }
+   
+    .agendamento-info {
+        padding-left: 0.5rem;
+        margin: 0.5rem 0;
+    }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+    .calendar-day {
+        min-height: 55px;
+        padding: 10px 3px;
+    }
+   
+    .calendar-grid {
+        gap: 3px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+    .calendar-day {
+        min-height: 65px;
+        padding: 12px 4px;
+    }
+}
+
+@media (min-width: 993px) {
+    .calendar-day {
+        min-height: 70px;
+        padding: 12px 5px;
+    }
+}
+
+/* Melhorar responsividade dos cards de agendamento */
+@media (max-width: 575px) {
+    .agendamento-card .col-12 {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+   
+    .card-body {
+        padding: 0.75rem;
+    }
+   
+    .card-title {
+        font-size: 0.9rem;
+    }
+   
+    .card-text {
+        font-size: 0.8rem;
+    }
+}
+
+/* Scroll horizontal suave para mobile */
+.calendar-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
+
+<!-- Dados dos eventos para o calendário (JSON) -->
+<script type="application/json" id="eventos-data">
+{
+{% for agendamento in agendamentos %}
+    "{{ agendamento.data_agendamento.strftime('%Y-%m-%d') }}": {"hasEvent": true, "status": "{{ agendamento.status }}"}{% if not loop.last %},{% endif %}
+{% endfor %}
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentDate = new Date();
+    let selectedDate = null;
+    const eventosCalendario = JSON.parse(document.getElementById('eventos-data').textContent || '{}');
+
+    // Inicializar calendário
+    renderCalendar(currentDate);
+
+    // Navegação do calendário
+    document.getElementById('prevMonth').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar(currentDate);
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar(currentDate);
+    });
+
+    function renderCalendar(date) {
+        const calendar = document.getElementById('calendar');
+        const year = date.getFullYear();
+        const month = date.getMonth();
+       
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+       
+        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                           "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+       
+        let calendarHTML = `
+            <div class="calendar-header">
+                <h4 class="mb-0">${monthNames[month]} ${year}</h4>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-day-header">Dom</div>
+                <div class="calendar-day-header">Seg</div>
+                <div class="calendar-day-header">Ter</div>
+                <div class="calendar-day-header">Qua</div>
+                <div class="calendar-day-header">Qui</div>
+                <div class="calendar-day-header">Sex</div>
+                <div class="calendar-day-header">Sáb</div>
+        `;
+       
+        // Dias vazios do mês anterior
+        for (let i = 0; i < startingDay; i++) {
+            const prevDate = new Date(year, month, -i);
+            calendarHTML += `<div class="calendar-day other-month">${prevDate.getDate()}</div>`;
+        }
+       
+        // Dias do mês atual
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+       
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateObj = new Date(year, month, day);
+            dateObj.setHours(0, 0, 0, 0);
+           
+            // Formatar data sem problemas de fuso horário
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const hasEvents = eventosCalendario[dateStr];
+            const isToday = today.getTime() === dateObj.getTime();
+            const isSelected = selectedDate === dateStr;
+           
+            let dayClass = 'calendar-day';
+            if (isToday) dayClass += ' today';
+            if (hasEvents) dayClass += ' has-events';
+            if (isSelected) dayClass += ' selected';
+           
+            calendarHTML += `
+                <div class="${dayClass}" data-date="${dateStr}">
+                    <span>${day}</span>
+                    ${hasEvents ? `<div class="event-dot ${hasEvents.status}"></div>` : ''}
+                </div>
+            `;
+        }
+       
+        calendarHTML += '</div>';
+        calendar.innerHTML = calendarHTML;
+       
+        // Adicionar event listeners aos dias
+        document.querySelectorAll('.calendar-day:not(.other-month)').forEach(day => {
+            day.addEventListener('click', function() {
+                selectedDate = this.getAttribute('data-date');
+                showAgendamentosByDate(selectedDate);
+                updateCalendarSelection();
+            });
+        });
+    }
+   
+    function updateCalendarSelection() {
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            day.classList.remove('selected');
+            if (day.getAttribute('data-date') === selectedDate) {
+                day.classList.add('selected');
+            }
+        });
+    }
+   
+    function showAgendamentosByDate(date) {
+        const cards = document.querySelectorAll('.agendamento-card');
+        let found = false;
+       
+        // Esconder todos os cards primeiro
+        cards.forEach(card => {
+            card.style.display = 'none';
+        });
+       
+        // Mostrar apenas os cards da data selecionada
+        cards.forEach(card => {
+            if (card.getAttribute('data-date') === date) {
+                card.style.display = 'block';
+                found = true;
+            }
+        });
+       
+        // CORREÇÃO: Formatar a data corretamente sem problemas de fuso horário
+        const [year, month, day] = date.split('-');
+       
+        // Formatar manualmente para evitar problemas de fuso horário
+        const formattedDate = `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+       
+        if (found) {
+            document.getElementById('listaTitulo').textContent =
+                `Agendamentos para ${formattedDate}`;
+        } else {
+            document.getElementById('listaTitulo').textContent =
+                `Nenhum agendamento para ${formattedDate}`;
+        }
+    }
+
+    // Esconder todos os cards primeiro
+    cards.forEach(card => {
+        card.style.display = 'none';
+    });
+});
+</script>
+{% endblock %}

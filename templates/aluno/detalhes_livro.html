@@ -1,0 +1,229 @@
+{% extends "aluno/base.html" %}
+{% block title %}{{ livro.titulo }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Botão Voltar -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div>
+            <a href="{{ url_for('catalogo') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Voltar ao Catálogo
+            </a>
+        </div>
+        <h1 class="h2">Detalhes do Livro</h1>
+        <div></div> <!-- Espaço vazio para alinhamento -->
+    </div>
+
+    <div class="row">
+        <!-- Coluna da Capa -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if livro.capa %}
+                    <img src="{{ url_for('static', filename='uploads/capas/' + livro.capa) }}" 
+                         class="img-fluid rounded" alt="{{ livro.titulo }}"
+                         style="max-height: 400px; object-fit: contain;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded" 
+                         style="height: 300px;">
+                        <i class="bi bi-book display-1 text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna dos Detalhes -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">{{ livro.titulo }}</h3>
+                    <p class="text-muted">por {{ livro.autor }}</p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Informações do Livro</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Autor:</strong> {{ livro.autor }}</li>
+                                <li><strong>Gênero:</strong> <span class="badge bg-primary">{{ livro.genero }}</span></li>
+                                <li><strong>ISBN:</strong> {{ livro.isbn }}</li>
+                                <li><strong>Unidade:</strong> <span class="badge bg-secondary">{{ livro.unidade }}</span></li>
+                                <li>
+                                    <strong>Disponibilidade:</strong> 
+                                    <span class="badge {% if livro.quantidade > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ livro.quantidade }} exemplar{{ 'es' if livro.quantidade > 1 else '' }} disponível{{ 's' if livro.quantidade > 1 else '' }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            {% if livro.quantidade > 0 %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i>
+                                <strong>Disponível para empréstimo</strong>
+                                <p class="mb-0 small">Este livro está disponível na unidade {{ livro.unidade }}</p>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-clock"></i>
+                                <strong>Aguardando disponibilidade</strong>
+                                <p class="mb-0 small">Todos os exemplares estão emprestados no momento</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if livro.descricao %}
+                    <div class="mb-4">
+                        <h6>Sinopse</h6>
+                        <p class="text-muted">{{ livro.descricao }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Botões Dinâmicos baseados no status do livro para o aluno -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        {% if livro_emprestado_para_aluno %}
+                            <!-- Se o aluno já tem este livro emprestado -->
+                            <div class="btn-group">
+                                {% if livro_emprestado_para_aluno.renovacoes < 2 and not livro_emprestado_para_aluno.data_devolucao_prevista < today %}
+                                <button class="btn btn-warning btn-lg renovar-btn" data-agendamento-id="{{ livro_emprestado_para_aluno.id }}">
+                                    <i class="bi bi-arrow-repeat"></i> Renovar ({{ 2 - livro_emprestado_para_aluno.renovacoes }} restantes)
+                                </button>
+                                {% elif livro_emprestado_para_aluno.renovacoes >= 2 %}
+                                <button class="btn btn-secondary btn-lg" disabled>
+                                    <i class="bi bi-arrow-repeat"></i> Limite de renovações
+                                </button>
+                                {% endif %}
+                                
+                                <a href="{{ url_for('agendamento.agendamento_devolucao', agendamento_id=livro_emprestado_para_aluno.id) }}" 
+                                   class="btn btn-success btn-lg">
+                                    <i class="bi bi-calendar-check"></i> Agendar Devolução
+                                </a>
+                            </div>
+                        {% elif livro.quantidade > 0 %}
+                            <!-- Se o livro está disponível e o aluno não o tem emprestado -->
+                            <a href="{{ url_for('agendamento.agendamento_emprestimo', livro_id=livro.id) }}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-bookmark-check"></i> Pegar Emprestado
+                            </a>
+                        {% else %}
+                            <!-- Se o livro não está disponível -->
+                            <button class="btn btn-secondary btn-lg" disabled>
+                                <i class="bi bi-clock"></i> Indisponível no Momento
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Informações do Empréstimo Atual (se o aluno tem o livro) -->
+                    {% if livro_emprestado_para_aluno %}
+                    <div class="mt-4 p-3 border rounded bg-light">
+                        <h6><i class="bi bi-info-circle"></i> Seu Empréstimo Atual</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="small mb-1">
+                                    <i class="bi bi-calendar-check"></i> 
+                                    <strong>Emprestado em:</strong> {{ livro_emprestado_para_aluno.data_emprestimo.strftime('%d/%m/%Y') }}
+                                </p>
+                                <p class="small mb-1 {% if livro_emprestado_para_aluno.data_devolucao_prevista < today %}text-danger{% endif %}">
+                                    <i class="bi bi-calendar-x"></i> 
+                                    <strong>Devolução prevista:</strong> {{ livro_emprestado_para_aluno.data_devolucao_prevista.strftime('%d/%m/%Y') }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="small mb-1">
+                                    <i class="bi bi-arrow-repeat"></i> 
+                                    <strong>Renovações:</strong> {{ livro_emprestado_para_aluno.renovacoes }}/2
+                                </p>
+                                {% if livro_emprestado_para_aluno.data_devolucao_prevista < today %}
+                                <div class="alert alert-danger py-2 mt-2">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <strong>Livro Atrasado!</strong>
+                                    <p class="mb-0 small">Entre em contato com a biblioteca.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Informações do Empréstimo -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações sobre o Empréstimo</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Local de Retirada/Devolução</h6>
+                            <p class="mb-2"><i class="bi bi-building"></i> <strong>{{ livro.unidade }}</strong></p>
+                            <p class="small text-muted">O livro deverá ser retirado e devolvido pessoalmente nesta unidade</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Horários</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="bi bi-sun"></i> <strong>Manhã:</strong> 9:30 às 10:40</li>
+                                <li><i class="bi bi-moon"></i> <strong>Tarde:</strong> 14:30 às 15:40</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn-group .btn {
+    margin-right: 0.5rem;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+</style>
+
+<script>
+// Função para renovar empréstimo
+document.addEventListener('DOMContentLoaded', function() {
+    const renovarBtns = document.querySelectorAll('.renovar-btn');
+    
+    renovarBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const agendamentoId = this.getAttribute('data-agendamento-id');
+            
+            if (confirm('Deseja renovar o empréstimo por mais 7 dias?')) {
+                fetch(`/aluno/emprestimo/${agendamentoId}/renovar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload(); // Recarregar a página para atualizar as informações
+                    } else {
+                        alert('Erro: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erro ao renovar empréstimo. Tente novamente.');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends "bibliotecario/base_bibliotecario.html" %}
+{% block title %}Agenda - Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Gerenciamento de Agendas</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <small class="text-muted">Unidade: {{ session.get('unidade') }}</small>
+        </div>
+    </div>
+
+    <!-- Filtros e Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-warning">{{ agendamentos|selectattr('status', 'equalto', 'pendente')|list|length }}</h4>
+                                <small class="text-muted">Pendentes</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-success">{{ agendamentos|selectattr('status', 'equalto', 'emprestado')|list|length }}</h4>
+                                <small class="text-muted">Emprestados</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-info">{{ agendamentos|selectattr('status', 'equalto', 'devolucao_agendada')|list|length }}</h4>
+                                <small class="text-muted">Devolução Agendada</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-secondary">{{ agendamentos|selectattr('status', 'equalto', 'devolvido')|list|length }}</h4>
+                                <small class="text-muted">Devolvidos</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-danger">{{ agendamentos|selectattr('status', 'equalto', 'cancelado')|list|length }}</h4>
+                                <small class="text-muted">Cancelados</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ agendamentos|length }}</h4>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Filtrar por Status:</label>
+                            <select class="form-select" id="filtroStatus">
+                                <option value="todos">Todos os Status</option>
+                                <option value="pendente">Pendentes</option>
+                                <option value="emprestado">Emprestados</option>
+                                <option value="devolucao_agendada">Devolução Agendada</option>
+                                <option value="devolvido">Devolvidos</option>
+                                <option value="cancelado">Cancelados</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ordenar por:</label>
+                            <select class="form-select" id="ordenarPor">
+                                <option value="data_asc">Data (Mais Próxima)</option>
+                                <option value="data_desc">Data (Mais Distante)</option>
+                                <option value="status">Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Buscar:</label>
+                            <input type="text" class="form-control" id="buscarInput" placeholder="Aluno ou livro...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Agendamentos -->
+    {% if agendamentos %}
+    <div class="row" id="agendamentosContainer">
+        {% for agendamento in agendamentos %}
+        <div class="col-md-6 col-lg-4 mb-4 agendamento-card" 
+             data-status="{{ agendamento.status }}"
+             data-aluno="{{ agendamento.aluno.nome.lower() }}"
+             data-livro="{{ agendamento.livro.titulo.lower() }}"
+             data-tipo="{{ agendamento.tipo_agendamento }}">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="badge 
+                        {% if agendamento.status == 'pendente' %}bg-warning
+                        {% elif agendamento.status == 'emprestado' %}bg-success
+                        {% elif agendamento.status == 'devolucao_agendada' %}bg-info
+                        {% elif agendamento.status == 'devolvido' %}bg-secondary
+                        {% elif agendamento.status == 'cancelado' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {% if agendamento.status == 'devolucao_agendada' %}Devolução Agendada
+                        {% else %}{{ agendamento.status|title }}{% endif %}
+                    </span>
+                    <small class="text-muted">#{{ agendamento.id }}</small>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Tipo do Agendamento -->
+                    <div class="mb-2">
+                        <span class="badge 
+                            {% if agendamento.tipo_agendamento == 'emprestimo' %}bg-primary
+                            {% else %}bg-success{% endif %}">
+                            {% if agendamento.tipo_agendamento == 'emprestimo' %}Empréstimo
+                            {% else %}Devolução{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Informações do Livro -->
+                    <div class="mb-3">
+                        <h6 class="card-title">{{ agendamento.livro.titulo }}</h6>
+                        <p class="card-text small text-muted mb-1">
+                            <i class="bi bi-person"></i> {{ agendamento.livro.autor }}
+                        </p>
+                        <p class="card-text small text-muted">
+                            <i class="bi bi-tag"></i> {{ agendamento.livro.genero }}
+                        </p>
+                    </div>
+
+                    <!-- Informações do Aluno -->
+                    <div class="mb-3">
+                        <p class="small mb-1">
+                            <i class="bi bi-person-circle"></i> 
+                            <strong>Aluno:</strong> {{ agendamento.aluno.nome }}
+                        </p>
+                        <p class="small mb-1">
+                            <i class="bi bi-envelope"></i> 
+                            <strong>Email:</strong> {{ agendamento.aluno.email }}
+                        </p>
+                    </div>
+
+                    <!-- Datas e Horários -->
+                    <div class="agendamento-dates">
+                        <p class="small mb-1">
+                            <i class="bi bi-calendar"></i> 
+                            <strong>Agendado para:</strong> {{ agendamento.data_agendamento.strftime('%d/%m/%Y') }}
+                        </p>
+                        <p class="small mb-1">
+                            <i class="bi bi-clock"></i> 
+                            <strong>Horário:</strong> 
+                            {% if agendamento.horario == 'manha' %}Manhã (9:30-10:40)
+                            {% else %}Tarde (14:30-15:40){% endif %}
+                        </p>
+                        
+                        {% if agendamento.data_emprestimo %}
+                        <p class="small mb-1">
+                            <i class="bi bi-check-circle text-success"></i> 
+                            <strong>Emprestado em:</strong> {{ agendamento.data_emprestimo.strftime('%d/%m/%Y %H:%M') }}
+                        </p>
+                        {% endif %}
+                        
+                        {% if agendamento.data_devolucao_prevista %}
+                        <p class="small mb-1 {% if agendamento.status == 'emprestado' and agendamento.data_devolucao_prevista < today %}text-danger{% endif %}">
+                            <i class="bi bi-calendar-check"></i> 
+                            <strong>Devolução prevista:</strong> {{ agendamento.data_devolucao_prevista.strftime('%d/%m/%Y') }}
+                            {% if agendamento.status == 'emprestado' and agendamento.data_devolucao_prevista < today %}
+                            <span class="badge bg-danger">Atrasado</span>
+                            {% endif %}
+                        </p>
+                        {% endif %}
+                        
+                        {% if agendamento.data_devolucao_real %}
+                        <p class="small mb-1">
+                            <i class="bi bi-box-arrow-in-left text-info"></i> 
+                            <strong>Devolvido em:</strong> {{ agendamento.data_devolucao_real.strftime('%d/%m/%Y %H:%M') }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="card-footer">
+                    {% if agendamento.status == 'pendente' and agendamento.tipo_agendamento == 'emprestimo' %}
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-sm" onclick="confirmarEmprestimo('{{ agendamento.id }}')">
+                            <i class="bi bi-check-lg"></i> Confirmar Empréstimo
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="cancelarAgendamento('{{ agendamento.id }}')">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </button>
+                    </div>
+                    {% elif agendamento.status == 'devolucao_agendada' %}
+                    <div class="d-grid">
+                        <button class="btn btn-success btn-sm" onclick="confirmarDevolucao('{{ agendamento.id }}')">
+                            <i class="bi bi-check-lg"></i> Confirmar Devolução
+                        </button>
+                    </div>
+                    {% elif agendamento.status == 'emprestado' %}
+                    <div class="d-grid">
+                        <small class="text-muted mb-2 text-center">Aguardando agendamento de devolução</small>
+                        {% if agendamento.data_devolucao_prevista < today %}
+                        <span class="badge bg-danger text-center">Atrasado</span>
+                        {% endif %}
+                    </div>
+                    {% elif agendamento.status == 'devolvido' %}
+                    <div class="text-center">
+                        <span class="badge bg-success">Processo Finalizado</span>
+                    </div>
+                    {% elif agendamento.status == 'cancelado' %}
+                    <div class="text-center">
+                        <span class="badge bg-danger">Agendamento Cancelado</span>
+                    </div>
+                    {% endif %}
+                    
+                    <small class="text-muted d-block mt-2">
+                        Criado em: {{ agendamento.data_criacao.strftime('%d/%m/%Y %H:%M') }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-calendar-x display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">Nenhum agendamento</h4>
+        <p class="text-muted">Não há agendamentos na sua unidade no momento.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.agendamento-card .card {
+    transition: transform 0.2s ease-in-out;
+    border-left: 4px solid #dee2e6;
+}
+
+.agendamento-card[data-status="pendente"] .card {
+    border-left-color: #ffc107;
+}
+
+.agendamento-card[data-status="emprestado"] .card {
+    border-left-color: #198754;
+}
+
+.agendamento-card[data-status="devolucao_agendada"] .card {
+    border-left-color: #0dcaf0;
+}
+
+.agendamento-card[data-status="devolvido"] .card {
+    border-left-color: #6c757d;
+}
+
+.agendamento-card[data-status="cancelado"] .card {
+    border-left-color: #dc3545;
+}
+
+.agendamento-card .card:hover {
+    transform: translateY(-5px);
+}
+
+.agendamento-dates {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/agenda_bibliotecario.js') }}"></script>
+{% endblock %}
