@@ -8,6 +8,8 @@ O sistema realiza autenticação de dois tipos de usuários — Bibliotecário e
 
 # 🔗 Links
 
-<a href="static/docs/apresentacao_tcc-sibi.pdf" target="_blank">Apresentação de slides</a>
+**Apresentação:**  
+<a href="static/docs/apresentacao_tcc-sibi.pdf" target="_blank">apresentacao_tcc-sibi.pdf</a>
 
-- [Protótipo no Figma](https://www.figma.com/design/bTaVNeodvI9vuvaZJR0ojm?node-id=)
+**Protótipo:**  
+<a href="https://www.figma.com/design/bTaVNeodvI9vuvaZJR0ojm?node-id=" target="_blank">protótipo-sibi</a>
