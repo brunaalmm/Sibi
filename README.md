@@ -1,3 +1,3 @@
 # Sibi — Sistema Integrado de Bibliotecas
 
-![Banner do projeto](https://raw.githubusercontent.com/brunaalmm/Sibi/main/static/img/base.png)
+![Banner do projeto](https://github.com/brunaalmm/Sibi/tree/main/static/img/base.png)
