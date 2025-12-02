@@ -9,7 +9,7 @@ O sistema realiza autenticação de dois tipos de usuários — Bibliotecário e
 # Links
 
 **Apresentação:**  
-https://drive.google.com/file/d/1bWgr7ngYfx6I5Cl2nUIecr--sX-YmKqF/view?usp=sharing
+https://drive.google.com/uc?export=download&id=1mVeJ2Gs79G71yY26x9Dt13xLKDLlmZLz
 
 **Protótipo:**  
 https://www.figma.com/design/bTaVNeodvI9vuvaZJR0ojm?node-id=
