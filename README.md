@@ -1,4 +1,4 @@
-# Sibi — Sistema Integrado de Bibliotecas
+# Sibi — Sistema Integrado de Biblioteca
 
 ![Banner do projeto](static/img/banner.png)
 
